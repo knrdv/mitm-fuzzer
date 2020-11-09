@@ -2,20 +2,18 @@
 
 # Imports
 from mitmproxy import ctx
-from mitmproxy import exceptions
 from mitmproxy import http
 from mitmproxy import command
 from mitmproxy import net
-from mitmproxy.script import concurrent
 import mitmproxy.addonmanager
 import os.path
-import requests
 from bs4 import BeautifulSoup
-import time
 
 
 PARAMETER_PREFIX = "fuzz_"
 PREFIX_LEN = len(PARAMETER_PREFIX)
+DBS_DIR = "./dbs/"
+LOGFILE = "./formfuzz.log"
 
 
 class FormFuzz:
@@ -24,11 +22,11 @@ class FormFuzz:
 
 	def __init__(self):
 		#self.forms_list: list = []
-		self.fuzzdbs: dict = {"default":"./default_fuzz_db"}
+		self.fuzzdbs: dict = {"default":str(DBS_DIR + "default")}
 		self.fuzz_inputs: dict = {}
 		self.host_monitors: list = ["192.168.100.17"]
 		self.host_filter_string = ["~d"]						# TODO: Change to list
-		self.logfile = "./formfuzz.log"
+		self.logfile = LOGFILE
 		open(self.logfile, "w").close()
 		self.last_used_token = None
 
@@ -56,7 +54,7 @@ class FormFuzz:
 		for parameter in parameters:
 			value = parameters[parameter]
 			if value.startswith(PARAMETER_PREFIX):
-				self.fuzzdbs[parameter] = value[PREFIX_LEN:]
+				self.fuzzdbs[parameter] = DBS_DIR + value[PREFIX_LEN:]
 				if not os.path.exists(self.fuzzdbs[parameter]):
 					ctx.log.error("FormFuzz: fuzz database " + self.fuzzdbs[parameter] + " does not exist")
 				else:
@@ -74,7 +72,8 @@ class FormFuzz:
 	def loadFuzzParameters(self, parameter: str) -> list:
 		param_path = self.fuzzdbs[parameter]
 		if not os.path.exists(param_path):
-			ctx.log.warning("FormFuzz: path " + param_path + " for parameter " + parameter + " does not exist")
+			ctx.log.info(param_path)
+			ctx.log.warn("FormFuzz: path " + param_path + " for parameter " + parameter + " does not exist")
 		with open(param_path, "r") as f:
 			fuzz_params = [x.strip() for x in f]
 		return fuzz_params
@@ -130,7 +129,7 @@ class FormFuzz:
 	
 	def response(self, flow: http.HTTPFlow):
 		if flow.request.method == "GET" and flow.request.path == "/dvwa/index.php":
-			returnq
+			return
 		if flow.request.method == "GET" and flow.request.host in self.host_monitors:
 			self.filelog("FormFuzz: RECEIVED NEW GET RESPONSE FROM SERVER: " + str(flow.response.text))
 
