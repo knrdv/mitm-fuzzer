@@ -34,14 +34,18 @@ class FormFuzz:
 		self.host_filter_string = ["~d"]
 		self.attack = Attack()
 
-	def checkPOST(self, flow: http.HTTPFlow) -> bool:
+	def detectFuzzParams(self, flow: http.HTTPFlow) -> bool:
 		"""Checks POST request for trigger parameters."""
-
+		#if not flow.request.method == "POST": logger.error("Not a POST request.")
+		if flow.request.method == "POST":
+			parameters = flow.request.urlencoded_form
+		elif flow.request.method == "GET":
+			parameters = flow.request.query
+		else:
+			logger.warning("Triggering parameters not detected in the request.")
 		fuzz = False
-		parameters = flow.request.urlencoded_form
 		for parameter in parameters:
-			value = parameters[parameter]
-			if value.startswith(PARAMETER_PREFIX):
+			if parameters[parameter].startswith(PARAMETER_PREFIX):
 				fuzz = True
 				break
 		return fuzz
@@ -58,6 +62,13 @@ class FormFuzz:
 		ctx.log.info("FormFuzz: successfully added new host monitor: " + host)
 		ctx.master.commands.call("view.filter.set", ' '.join(self.host_filter_string))
 
+	@command.command("formfuzz.setsuccess")
+	def setsuccess(self, success_string: str) -> None:
+		"""Sets a string which determines a successful use of credentials."""
+		
+		self.attack.setSuccessString(success_string)
+		logger.log("Success string set to: " + success_string)
+
 
 # MITM EVENTS
 
@@ -73,10 +84,9 @@ class FormFuzz:
 
 		if self.attack.isRunning():
 			self.attack.handleRequest(flow)
-		else:
-			if flow.request.method == "POST" and flow.request.host in self.host_monitors and not flow.is_replay:
-				if self.checkPOST(flow):
-					self.attack.start(flow)
+		elif flow.request.host in self.host_monitors and not flow.is_replay:
+			if self.detectFuzzParams(flow):
+				self.attack.start(flow)
 
 	def response(self, flow: http.HTTPFlow) -> None:
 		"""Forwards responses."""
