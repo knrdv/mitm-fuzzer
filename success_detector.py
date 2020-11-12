@@ -13,7 +13,8 @@ class SuccessDetector:
 	def __init__(self, ss=None):
 		self.last_credentials = None
 		self.responses = []
-		self.success_string = ss
+		self.trigger_string = ss
+		self.inverted_mode = False
 
 	def insertResponse(self, flow: http.HTTPFlow) -> None:
 		"""Inserts all received responses in a list for later processing."""
@@ -29,15 +30,21 @@ class SuccessDetector:
 		self.last_credentials = credentials
 		logger.info("Credentials set:" + str(credentials))
 
-	def setSuccessString(self, success_string: str) -> None:
+	def setSuccessString(self, trigger_string: str) -> None:
 		"""Sets string indicating correct response."""
 
-		self.success_string = success_string
+		self.trigger_string = trigger_string
+
+	def setNotSuccessString(self, trigger_string: str) -> None:
+		"""Set inverse trigger to given string."""
+
+		self.trigger_string = trigger_string
+		self.inverted_mode = True
 
 	def delSuccessString(self):
 		"""Sets suc.str. back to Null"""
 
-		self.success_string = None
+		self.trigger_string = None
 
 
 	def isSuccess(self, flow: http.HTTPFlow) -> dict:
@@ -49,8 +56,13 @@ class SuccessDetector:
 		
 		self.insertResponse(flow)
 
-		if self.success_string in flow.response.text:
-			result = self.last_credentials
-			logger.info("SUCCESSFUL RESPONSE, last credentials:" + str(result))
+		if not self.inverted_mode:
+			if self.trigger_string in flow.response.text:
+				result = self.last_credentials
+				logger.info("Trigger string in normal mode detected, last credentials:" + str(result))
+			if self.trigger_string not in flow.response.text:
+				result = self.last_credentials
+				logger.info("Trigger string in inverted mode detected, last credentials:" + str(result))
+
 		return result
 

@@ -35,7 +35,7 @@ class BFFuzz:
 
 	def detectFuzzParams(self, flow: http.HTTPFlow) -> bool:
 		"""Checks POST request for trigger parameters."""
-		
+
 		if flow.request.method == "POST":
 			parameters = flow.request.urlencoded_form
 		elif flow.request.method == "GET":
@@ -62,12 +62,19 @@ class BFFuzz:
 		ctx.log.info("BFFuzz: successfully added new host monitor: " + host)
 		ctx.master.commands.call("view.filter.set", ' '.join(self.host_filter_string))
 
-	@command.command("bffuzz.setsuccess")
-	def setsuccess(self, success_string: str) -> None:
+	@command.command("bffuzz.settrigger")
+	def settrigger(self, trigger_str: str) -> None:
 		"""Sets a string which determines a successful use of credentials."""
 		
-		self.attack.setSuccessString(success_string)
-		logger.log("Success string set to: " + success_string)
+		self.attack.setSuccessString(trigger_str)
+		logger.log("Triggering string set to: " + trigger_str)
+
+	@command.command("bffuzz.setnottrigger")
+	def setnottrigger(self, trigger_str: str) -> None:
+		"""Determines attack success based on lack of provided string."""
+
+		self.attack.setNotSuccessString(trigger_str)
+		logger.log("Not triggering string set to: " + trigger_str)
 
 
 # MITM EVENTS
@@ -95,6 +102,7 @@ class BFFuzz:
 
 	def response(self, flow: http.HTTPFlow) -> None:
 		"""Forwards responses."""
+
 		if self.attack and self.attack.isRunning():
 			self.attack.handleResponse(flow)
 

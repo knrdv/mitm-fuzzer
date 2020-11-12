@@ -65,6 +65,11 @@ class Attack():
 
 		self.SD.setSuccessString(ss)
 
+	def setNotSuccessString(self, ss: str) -> None:
+		"""Sets an inverted trigger string."""
+
+		self.SD.setNotSuccessString(ss)
+
 	def setFuzzDBPaths(self) -> None:
 		"""Identifies fuzzed parameters and maps them to respective file paths"""
 
