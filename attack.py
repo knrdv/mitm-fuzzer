@@ -118,10 +118,12 @@ class Attack():
 
 	@abstractmethod
 	def prepareOriginatorReplay(self, token: str=None) -> http.HTTPFlow:
+		"""Prepares a reply mechanism from initial triggering request used as a template."""
 		pass
 
 
 class POSTAttack(Attack):
+	"""Implements a POST Attack."""
 
 	def __init__(self, flow: http.HTTPFlow):
 		super().__init__(flow)
@@ -226,6 +228,8 @@ class POSTAttack(Attack):
 
 
 class GETAttack(Attack):
+	"""Implements a GET Attack."""
+
 	def __init__(self, flow: http.HTTPFlow):
 		super().__init__(flow)
 		self.SD.setSuccessString("Welcome to the password")

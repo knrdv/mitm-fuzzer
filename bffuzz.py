@@ -35,7 +35,7 @@ class BFFuzz:
 
 	def detectFuzzParams(self, flow: http.HTTPFlow) -> bool:
 		"""Checks POST request for trigger parameters."""
-		#if not flow.request.method == "POST": logger.error("Not a POST request.")
+		
 		if flow.request.method == "POST":
 			parameters = flow.request.urlencoded_form
 		elif flow.request.method == "GET":

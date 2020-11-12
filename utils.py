@@ -48,6 +48,8 @@ def extractCSRF(flow: http.HTTPFlow) -> str:
 
 
 def getRequestParams(request: net.http.request) -> dict:
+	"""Gets request parameter depending on request method"""
+
 	if request.method == "GET":
 		return request.query
 	elif request.method == "POST":
@@ -71,12 +73,16 @@ def setFlowRequestParameter(flow, param, val):
 		return
 
 def prettyPrintDict(d: dict) -> str:
+	"""Used to prepare a dictionary for printing in messages."""
+
 	retstr = ""
 	for key, value in d.items():
 		retstr += key + ": " + value + "\n"
 	return retstr
 
 def showMessage(title: str, msg: str) -> None:
+	"""Uses Tkinter to spawn a simple message window"""
+	
 	window = tk.Tk()
 	if messagebox.showinfo(title, msg):
 		window.destroy()
