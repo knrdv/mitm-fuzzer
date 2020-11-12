@@ -10,19 +10,15 @@ from mitmproxy import command
 import mitmproxy.addonmanager
 import logging
 from attack import POSTAttack, GETAttack
-
-PARAMETER_PREFIX = "fuzz_"
-PREFIX_LEN = len(PARAMETER_PREFIX)
-DBS_DIR = "./dbs/"
-LOGFILE = "./BFFuzz.log"
+import config
 
 logger = logging.getLogger("bffuzz")
 logger.setLevel(logging.DEBUG)
-fh = logging.FileHandler(LOGFILE)
+fh = logging.FileHandler(config.LOGFILE)
 formatter = logging.Formatter("%(name)s:%(levelname)s:%(message)s")
 fh.setFormatter(formatter)
 logger.addHandler(fh)
-open(LOGFILE, "w").close()
+open(config.LOGFILE, "w").close()
 
 class BFFuzz:
 	"""A class with purpose of detection of attack-trigger parameters."""
@@ -45,7 +41,7 @@ class BFFuzz:
 			logger.warning("Triggering parameters not detected in the request.")
 		fuzz = False
 		for parameter in parameters:
-			if parameters[parameter].startswith(PARAMETER_PREFIX):
+			if parameters[parameter].startswith(config.PARAMETER_PREFIX):
 				fuzz = True
 				logger.info("BFFuzz: Trigger parameters detected")
 				break

@@ -11,13 +11,9 @@ from bs4 import BeautifulSoup
 from abc import ABC, abstractmethod
 import utils
 from success_detector import SuccessDetector
+import config
 
 logger = logging.getLogger("bffuzz")
-
-PARAMETER_PREFIX = "fuzz_"
-PREFIX_LEN = len(PARAMETER_PREFIX)
-DBS_DIR = "./dbs/"
-
 
 class Attack():
 	"""Class implementing the attack."""
@@ -70,8 +66,8 @@ class Attack():
 		parameters = utils.getRequestParams(self.originator_flow.request)
 		for parameter in parameters:
 			value = parameters[parameter]
-			if value.startswith(PARAMETER_PREFIX):
-				self.fuzzdbs[parameter] = DBS_DIR + value[PREFIX_LEN:]
+			if value.startswith(config.PARAMETER_PREFIX):
+				self.fuzzdbs[parameter] = config.DBS_DIR + value[config.PREFIX_LEN:]
 				if not os.path.exists(self.fuzzdbs[parameter]):
 					logger.error("Fuzz database " + self.fuzzdbs[parameter] + " does not exist")
 				else:

@@ -11,12 +11,9 @@ from bs4 import BeautifulSoup
 from mitmproxy import net
 import tkinter as tk
 from tkinter import messagebox
+import config
 
 logger = logging.getLogger("bffuzz")
-
-PARAMETER_PREFIX = "fuzz_"
-PREFIX_LEN = len(PARAMETER_PREFIX)
-DBS_DIR = "./dbs/"
 
 def loadPathToList(file_path: str) -> list:
 	"""Loads content from path file to a list"""
@@ -82,7 +79,7 @@ def prettyPrintDict(d: dict) -> str:
 
 def showMessage(title: str, msg: str) -> None:
 	"""Uses Tkinter to spawn a simple message window"""
-	
+
 	window = tk.Tk()
 	if messagebox.showinfo(title, msg):
 		window.destroy()
