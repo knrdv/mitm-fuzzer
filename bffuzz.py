@@ -17,7 +17,6 @@ PARAMETER_PREFIX = "fuzz_"
 PREFIX_LEN = len(PARAMETER_PREFIX)
 DBS_DIR = "./dbs/"
 LOGFILE = "./BFFuzz.log"
-TEST_HOST = "127.0.0.2"
 
 logger = logging.getLogger("bffuzz")
 logger.setLevel(logging.DEBUG)
