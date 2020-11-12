@@ -7,7 +7,6 @@ the list of fuzz inputs contained inside a file in the DBS_DIR.
 from mitmproxy import ctx
 from mitmproxy import http
 from mitmproxy import command
-from mitmproxy import net
 import mitmproxy.addonmanager
 import logging
 from attack import POSTAttack, GETAttack
@@ -15,10 +14,10 @@ from attack import POSTAttack, GETAttack
 PARAMETER_PREFIX = "fuzz_"
 PREFIX_LEN = len(PARAMETER_PREFIX)
 DBS_DIR = "./dbs/"
-LOGFILE = "./formfuzz.log"
+LOGFILE = "./BFFuzz.log"
 TEST_HOST = "127.0.0.2"
 
-logger = logging.getLogger("formfuzz")
+logger = logging.getLogger("BFFuzz")
 logger.setLevel(logging.DEBUG)
 fh = logging.FileHandler(LOGFILE)
 formatter = logging.Formatter("%(name)s:%(levelname)s:%(message)s")
@@ -26,7 +25,7 @@ fh.setFormatter(formatter)
 logger.addHandler(fh)
 open(LOGFILE, "w").close()
 
-class FormFuzz:
+class BFFuzz:
 	"""A class with purpose of detection of attack-trigger parameters."""
 
 	def __init__(self):
@@ -47,23 +46,23 @@ class FormFuzz:
 		for parameter in parameters:
 			if parameters[parameter].startswith(PARAMETER_PREFIX):
 				fuzz = True
-				logger.info("FormFuzz: Trigger parameters detected")
+				logger.info("BFFuzz: Trigger parameters detected")
 				break
 		return fuzz
 
 
 # MITM COMMANDS
 
-	@command.command("formfuzz.subscribe")
+	@command.command("BFFuzz.subscribe")
 	def subscribe(self, host: str) -> None:
 		"""Adds host to the list of monitored hosts."""
 
 		self.host_monitors.append(host)
 		self.host_filter_string.append(host)
-		ctx.log.info("FormFuzz: successfully added new host monitor: " + host)
+		ctx.log.info("BFFuzz: successfully added new host monitor: " + host)
 		ctx.master.commands.call("view.filter.set", ' '.join(self.host_filter_string))
 
-	@command.command("formfuzz.setsuccess")
+	@command.command("BFFuzz.setsuccess")
 	def setsuccess(self, success_string: str) -> None:
 		"""Sets a string which determines a successful use of credentials."""
 		
@@ -76,7 +75,7 @@ class FormFuzz:
 	def load(self, entry: mitmproxy.addonmanager.Loader):
 		"""Triggers after mitmproxy addon has been loaded."""
 
-		ctx.log.info("FormFuzz: addon loaded successfully")
+		ctx.log.info("BFFuzz: addon loaded successfully")
 		self.host_filter_string.append(self.host_monitors[0])
 		ctx.master.commands.call("view.filter.set", ' '.join(self.host_filter_string))
 
@@ -99,5 +98,5 @@ class FormFuzz:
 			self.attack.handleResponse(flow)
 
 addons = [
-	FormFuzz()
+	BFFuzz()
 ]
