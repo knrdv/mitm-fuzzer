@@ -17,7 +17,7 @@ DBS_DIR = "./dbs/"
 LOGFILE = "./BFFuzz.log"
 TEST_HOST = "127.0.0.2"
 
-logger = logging.getLogger("BFFuzz")
+logger = logging.getLogger("bffuzz")
 logger.setLevel(logging.DEBUG)
 fh = logging.FileHandler(LOGFILE)
 formatter = logging.Formatter("%(name)s:%(levelname)s:%(message)s")
@@ -53,7 +53,7 @@ class BFFuzz:
 
 # MITM COMMANDS
 
-	@command.command("BFFuzz.subscribe")
+	@command.command("bffuzz.subscribe")
 	def subscribe(self, host: str) -> None:
 		"""Adds host to the list of monitored hosts."""
 
@@ -62,7 +62,7 @@ class BFFuzz:
 		ctx.log.info("BFFuzz: successfully added new host monitor: " + host)
 		ctx.master.commands.call("view.filter.set", ' '.join(self.host_filter_string))
 
-	@command.command("BFFuzz.setsuccess")
+	@command.command("bffuzz.setsuccess")
 	def setsuccess(self, success_string: str) -> None:
 		"""Sets a string which determines a successful use of credentials."""
 		
@@ -86,6 +86,7 @@ class BFFuzz:
 			self.attack.handleRequest(flow)
 		elif flow.request.host in self.host_monitors:
 			start_attack = self.detectFuzzParams(flow)
+			logger.info("Got start attack:"+str(start_attack))
 			if start_attack:
 				if flow.request.method == "GET":
 					self.attack = GETAttack(flow)

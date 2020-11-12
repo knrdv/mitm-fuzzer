@@ -9,8 +9,10 @@ from mitmproxy import http
 import os.path
 from bs4 import BeautifulSoup
 from mitmproxy import net
+import tkinter as tk
+from tkinter import messagebox
 
-logger = logging.getLogger("formfuzz")
+logger = logging.getLogger("bffuzz")
 
 PARAMETER_PREFIX = "fuzz_"
 PREFIX_LEN = len(PARAMETER_PREFIX)
@@ -67,3 +69,14 @@ def setFlowRequestParameter(flow, param, val):
 	else:
 		logger.error("This flow contains neither a GET or POST request")
 		return
+
+def prettyPrintDict(d: dict) -> str:
+	retstr = ""
+	for key, value in d.items():
+		retstr += key + ": " + value + "\n"
+	return retstr
+
+def showMessage(title: str, msg: str) -> None:
+	window = tk.Tk()
+	if messagebox.showinfo(title, msg):
+		window.destroy()

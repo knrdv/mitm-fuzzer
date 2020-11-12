@@ -13,7 +13,7 @@ from abc import ABC, abstractmethod
 import utils
 from success_detector import SuccessDetector
 
-logger = logging.getLogger("formfuzz")
+logger = logging.getLogger("bffuzz")
 
 PARAMETER_PREFIX = "fuzz_"
 PREFIX_LEN = len(PARAMETER_PREFIX)
@@ -33,6 +33,7 @@ class Attack():
 		self.fuzzed_host = None
 		self.fuzzed_url = None
 		self.originator_flow = originator_flow
+		logger.info("Got instantiated attack")
 
 	def isRunning(self):
 		"""Checks if the attack is still running."""
@@ -98,6 +99,7 @@ class Attack():
 			if param in self.fuzz_inputs:
 				if not self.fuzz_inputs[param]:
 					logger.warning("Fuzz input list is empty, terminating attack")
+					utils.showMessage("Error", "Attack stopped: fuzz inputs depleted")
 					self.stop()
 					return
 				utils.setFlowRequestParameter(flow, param, self.fuzz_inputs[param].pop())
@@ -173,9 +175,11 @@ class POSTAttack(Attack):
 
 			credentials = self.SD.isSuccess(flow)
 			if credentials:
-				self.stop()
 				logger.info("Found credentials, attack stopped")
 				logger.info("Credentials: " + str(credentials))
+				pp_creds = utils.prettyPrintDict(credentials)
+				utils.showMessage("Success", str("Correct credentials:\n" + pp_creds))
+				self.stop()
 				return
 			logger.info("Wrong GET response intercepted")
 
@@ -200,9 +204,11 @@ class POSTAttack(Attack):
 
 				credentials = self.SD.isSuccess(flow)
 				if credentials:
-					self.stop()
 					logger.info("Found credentials, attack stopped")
 					logger.info("Credentials: " + str(credentials))
+					pp_creds = utils.prettyPrintDict(credentials)
+					utils.showMessage("Success", str("Correct credentials:\n" + pp_creds))
+					self.stop()
 					return
 				logger.info("Response is not successful")
 

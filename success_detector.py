@@ -5,7 +5,7 @@ This class represents success detector
 import logging
 from mitmproxy import http
 
-logger = logging.getLogger("formfuzz")
+logger = logging.getLogger("bffuzz")
 
 class SuccessDetector:
 	"""Detects expected responses for correct credentials"""
