@@ -24,7 +24,7 @@ class BFFuzz:
 	"""A class with purpose of detection of attack-trigger parameters."""
 
 	def __init__(self):
-		self.host_monitors: list = []#[TEST_HOST]
+		self.host_monitors: list = []
 		self.host_filter_string = ["~d"]
 		self.attack = None
 		self.trigger_string = None
