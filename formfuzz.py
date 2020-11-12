@@ -10,7 +10,7 @@ from mitmproxy import command
 from mitmproxy import net
 import mitmproxy.addonmanager
 import logging
-from utils import Attack
+from attack import POSTAttack, GETAttack
 
 PARAMETER_PREFIX = "fuzz_"
 PREFIX_LEN = len(PARAMETER_PREFIX)
@@ -32,7 +32,7 @@ class FormFuzz:
 	def __init__(self):
 		self.host_monitors: list = [TEST_HOST]
 		self.host_filter_string = ["~d"]
-		self.attack = Attack()
+		self.attack = None
 
 	def detectFuzzParams(self, flow: http.HTTPFlow) -> bool:
 		"""Checks POST request for trigger parameters."""
@@ -47,14 +47,15 @@ class FormFuzz:
 		for parameter in parameters:
 			if parameters[parameter].startswith(PARAMETER_PREFIX):
 				fuzz = True
+				logger.info("FormFuzz: Trigger parameters detected")
 				break
 		return fuzz
 
 
 # MITM COMMANDS
 
-	@command.command("formfuzz.addhostmon")
-	def addhostmon(self, host: str) -> None:
+	@command.command("formfuzz.subscribe")
+	def subscribe(self, host: str) -> None:
 		"""Adds host to the list of monitored hosts."""
 
 		self.host_monitors.append(host)
@@ -82,15 +83,19 @@ class FormFuzz:
 	def request(self, flow: http.HTTPFlow) -> None:
 		"""Triggers an attack when correct parameters are detected."""
 
-		if self.attack.isRunning():
+		if self.attack and self.attack.isRunning():
 			self.attack.handleRequest(flow)
-		elif flow.request.host in self.host_monitors and not flow.is_replay:
-			if self.detectFuzzParams(flow):
-				self.attack.start(flow)
+		elif flow.request.host in self.host_monitors:
+			start_attack = self.detectFuzzParams(flow)
+			if start_attack:
+				if flow.request.method == "GET":
+					self.attack = GETAttack(flow)
+				elif flow.request.method == "POST":
+					self.attack = POSTAttack(flow)
 
 	def response(self, flow: http.HTTPFlow) -> None:
 		"""Forwards responses."""
-		if self.attack.isRunning():
+		if self.attack and self.attack.isRunning():
 			self.attack.handleResponse(flow)
 
 addons = [
