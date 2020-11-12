@@ -7,8 +7,6 @@ the list of fuzz inputs contained inside a file in the DBS_DIR.
 from mitmproxy import ctx
 from mitmproxy import http
 from mitmproxy import command
-#from mitmproxy import types
-#import typing
 import mitmproxy.addonmanager
 import logging
 from attack import POSTAttack, GETAttack
@@ -90,8 +88,6 @@ class BFFuzz:
 		"""Triggers after mitmproxy addon has been loaded."""
 
 		ctx.log.info("BFFuzz: addon loaded successfully")
-		#self.host_filter_string.append(self.host_monitors[0])
-		#ctx.master.commands.call("view.filter.set", ' '.join(self.host_filter_string))
 
 	def request(self, flow: http.HTTPFlow) -> None:
 		"""Triggers an attack when correct parameters are detected."""

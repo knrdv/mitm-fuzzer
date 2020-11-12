@@ -2,7 +2,6 @@
 
 This module implements attacks
 """
-
 import logging
 from mitmproxy import http
 from mitmproxy import net
@@ -129,8 +128,6 @@ class POSTAttack(Attack):
 		super().__init__(flow)
 		self.get_tmp = None
 		self.SD.setSuccessString("logged in")
-		#self.start()
-		#logger.info("Started POST Attack")
 
 	def prepareOriginatorReplay(self, token=None) -> http.HTTPFlow:
 		"""Prepares a new POST request from the originator POST form"""
@@ -233,8 +230,6 @@ class GETAttack(Attack):
 	def __init__(self, flow: http.HTTPFlow):
 		super().__init__(flow)
 		self.SD.setSuccessString("Welcome to the password")
-		#self.start()
-		#logger.info("GET Attack started")
 
 	def prepareOriginatorReplay(self, token=None) -> http.HTTPFlow:
 		"""Prepares a new POST request from the originator POST form"""
