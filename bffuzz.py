@@ -7,6 +7,8 @@ the list of fuzz inputs contained inside a file in the DBS_DIR.
 from mitmproxy import ctx
 from mitmproxy import http
 from mitmproxy import command
+#from mitmproxy import types
+#import typing
 import mitmproxy.addonmanager
 import logging
 from attack import POSTAttack, GETAttack
@@ -29,9 +31,11 @@ class BFFuzz:
 	"""A class with purpose of detection of attack-trigger parameters."""
 
 	def __init__(self):
-		self.host_monitors: list = [TEST_HOST]
+		self.host_monitors: list = []#[TEST_HOST]
 		self.host_filter_string = ["~d"]
 		self.attack = None
+		self.trigger_string = None
+		self.invert_attack = False
 
 	def detectFuzzParams(self, flow: http.HTTPFlow) -> bool:
 		"""Checks POST request for trigger parameters."""
@@ -50,6 +54,17 @@ class BFFuzz:
 				break
 		return fuzz
 
+	def setAttackMode(self):
+		"""Sets attack mode to inverted or not inverted."""
+
+		if not self.attack:
+			logger.error("Attack object not instantiated")
+			return
+		if not self.trigger_string:
+			logger.error("Set a trigger string usin commands")
+			return
+		self.attack.setSuccessString(self.trigger_string, self.invert_attack)
+
 
 # MITM COMMANDS
 
@@ -63,19 +78,12 @@ class BFFuzz:
 		ctx.master.commands.call("view.filter.set", ' '.join(self.host_filter_string))
 
 	@command.command("bffuzz.settrigger")
-	def settrigger(self, trigger_str: str) -> None:
+	def settrigger(self, trigger_str: str, inverted: bool=False) -> None:
 		"""Sets a string which determines a successful use of credentials."""
 		
-		self.attack.setSuccessString(trigger_str)
-		logger.log("Triggering string set to: " + trigger_str)
-
-	@command.command("bffuzz.setnottrigger")
-	def setnottrigger(self, trigger_str: str) -> None:
-		"""Determines attack success based on lack of provided string."""
-
-		self.attack.setNotSuccessString(trigger_str)
-		logger.log("Not triggering string set to: " + trigger_str)
-
+		self.trigger_string = trigger_str
+		self.invert_attack = inverted
+		logger.info("Triggering string set to: " + self.trigger_string + ", inverted:" + str(self.invert_attack))
 
 # MITM EVENTS
 
@@ -83,8 +91,8 @@ class BFFuzz:
 		"""Triggers after mitmproxy addon has been loaded."""
 
 		ctx.log.info("BFFuzz: addon loaded successfully")
-		self.host_filter_string.append(self.host_monitors[0])
-		ctx.master.commands.call("view.filter.set", ' '.join(self.host_filter_string))
+		#self.host_filter_string.append(self.host_monitors[0])
+		#ctx.master.commands.call("view.filter.set", ' '.join(self.host_filter_string))
 
 	def request(self, flow: http.HTTPFlow) -> None:
 		"""Triggers an attack when correct parameters are detected."""
@@ -97,8 +105,14 @@ class BFFuzz:
 			if start_attack:
 				if flow.request.method == "GET":
 					self.attack = GETAttack(flow)
+					self.setAttackMode()
+					self.attack.start()
+
 				elif flow.request.method == "POST":
 					self.attack = POSTAttack(flow)
+					self.setAttackMode()
+					self.attack.start()
+
 
 	def response(self, flow: http.HTTPFlow) -> None:
 		"""Forwards responses."""

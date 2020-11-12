@@ -30,16 +30,11 @@ class SuccessDetector:
 		self.last_credentials = credentials
 		logger.info("Credentials set:" + str(credentials))
 
-	def setSuccessString(self, trigger_string: str) -> None:
+	def setSuccessString(self, trigger_string: str, inverted=False) -> None:
 		"""Sets string indicating correct response."""
 
 		self.trigger_string = trigger_string
-
-	def setNotSuccessString(self, trigger_string: str) -> None:
-		"""Set inverse trigger to given string."""
-
-		self.trigger_string = trigger_string
-		self.inverted_mode = True
+		self.inverted_mode = inverted
 
 	def delSuccessString(self):
 		"""Sets suc.str. back to Null"""
@@ -60,6 +55,7 @@ class SuccessDetector:
 			if self.trigger_string in flow.response.text:
 				result = self.last_credentials
 				logger.info("Trigger string in normal mode detected, last credentials:" + str(result))
+		else:
 			if self.trigger_string not in flow.response.text:
 				result = self.last_credentials
 				logger.info("Trigger string in inverted mode detected, last credentials:" + str(result))

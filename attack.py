@@ -60,15 +60,10 @@ class Attack():
 		self.SD = None
 		self.originator_flow = None
 
-	def setSuccessString(self, ss: str) -> None:
-		"""Sets a success string in SuccessDetector."""
+	def setSuccessString(self, trigger_string: str, inverted=False) -> None:
+		"""Sets string indicating correct response."""
 
-		self.SD.setSuccessString(ss)
-
-	def setNotSuccessString(self, ss: str) -> None:
-		"""Sets an inverted trigger string."""
-
-		self.SD.setNotSuccessString(ss)
+		self.SD.setSuccessString(trigger_string, inverted)
 
 	def setFuzzDBPaths(self) -> None:
 		"""Identifies fuzzed parameters and maps them to respective file paths"""
@@ -134,8 +129,8 @@ class POSTAttack(Attack):
 		super().__init__(flow)
 		self.get_tmp = None
 		self.SD.setSuccessString("logged in")
-		self.start()
-		logger.info("Started POST Attack")
+		#self.start()
+		#logger.info("Started POST Attack")
 
 	def prepareOriginatorReplay(self, token=None) -> http.HTTPFlow:
 		"""Prepares a new POST request from the originator POST form"""
@@ -238,8 +233,8 @@ class GETAttack(Attack):
 	def __init__(self, flow: http.HTTPFlow):
 		super().__init__(flow)
 		self.SD.setSuccessString("Welcome to the password")
-		self.start()
-		logger.info("GET Attack started")
+		#self.start()
+		#logger.info("GET Attack started")
 
 	def prepareOriginatorReplay(self, token=None) -> http.HTTPFlow:
 		"""Prepares a new POST request from the originator POST form"""
@@ -274,9 +269,11 @@ class GETAttack(Attack):
 
 			credentials = self.SD.isSuccess(flow)
 			if credentials:
-				self.stop()
 				logger.info("Found credentials, attack stopped")
 				logger.info("Credentials: " + str(credentials))
+				pp_creds = utils.prettyPrintDict(credentials)
+				utils.showMessage("Success", str("Correct credentials:\n" + pp_creds))
+				self.stop()
 				return
 			logger.info("Wrong GET response intercepted, extracting token")
 
