@@ -37,4 +37,10 @@ In mitmproxy window, subscribe to 127.0.0.2 to filter all traffic except from 12
 : bffuzz.subscribe 127.0.0.2
 ```
 
+In mitmproxy window, set a trigger string so the fuzzer knows when correct parameters are found:
+```
+: bffuzz.settrigger 'password incorrect'
+```
+What this will do is that the fuzzer will iteratively send request and check responses either until all input values are exhausted or the trigger string is found in the response.
+
 In web application user input form window with 2 parameters (e.g. username and password parameters), hold one parameter constant and for the other parameter enter "fuzz_abc". Upon intercept, bffuzz will detect that this is a testing parameter and that it should perform bruteforcing against the detected testing parameter with input values from file <bffuzz home dir>/dbs/abc.
